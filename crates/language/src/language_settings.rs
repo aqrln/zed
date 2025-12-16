@@ -65,6 +65,8 @@ pub struct WhitespaceMap {
 pub struct LanguageSettings {
     /// How many columns a tab should occupy.
     pub tab_size: NonZeroU32,
+    /// How many columns should be used for indentation.
+    pub indent_size: NonZeroU32,
     /// Whether to indent lines using tab characters, as opposed to multiple
     /// spaces.
     pub hard_tabs: bool,
@@ -477,11 +479,12 @@ fn merge_with_editorconfig(settings: &mut LanguageSettings, cfg: &EditorconfigPr
         MaxLineLen::Value(u) => Some(u as u32),
         MaxLineLen::Off => None,
     });
-    let tab_size = cfg.get::<IndentSize>().ok().and_then(|v| match v {
+    let tab_size = cfg.get::<TabWidth>().ok().and_then(|v| match v {
+        TabWidth::Value(u) => NonZeroU32::new(u as u32),
+    });
+    let indent_size = cfg.get::<IndentSize>().ok().and_then(|v| match v {
         IndentSize::Value(u) => NonZeroU32::new(u as u32),
-        IndentSize::UseTabWidth => cfg.get::<TabWidth>().ok().and_then(|w| match w {
-            TabWidth::Value(u) => NonZeroU32::new(u as u32),
-        }),
+        IndentSize::UseTabWidth => tab_size,
     });
     let hard_tabs = cfg
         .get::<IndentStyle>()
@@ -506,6 +509,7 @@ fn merge_with_editorconfig(settings: &mut LanguageSettings, cfg: &EditorconfigPr
     }
     merge(&mut settings.preferred_line_length, preferred_line_length);
     merge(&mut settings.tab_size, tab_size);
+    merge(&mut settings.indent_size, indent_size);
     merge(&mut settings.hard_tabs, hard_tabs);
     merge(
         &mut settings.remove_trailing_whitespace_on_save,
@@ -531,6 +535,7 @@ impl settings::Settings for AllLanguageSettings {
 
             LanguageSettings {
                 tab_size: settings.tab_size.unwrap(),
+                indent_size: settings.indent_size.unwrap_or(settings.tab_size.unwrap()),
                 hard_tabs: settings.hard_tabs.unwrap(),
                 soft_wrap: settings.soft_wrap.unwrap(),
                 preferred_line_length: settings.preferred_line_length.unwrap(),

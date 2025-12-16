@@ -41,7 +41,10 @@ pub use signature_help::SignatureHelp;
 
 pub fn lsp_formatting_options(settings: &LanguageSettings) -> lsp::FormattingOptions {
     lsp::FormattingOptions {
-        tab_size: settings.tab_size.into(),
+        // LSP doesn't distinguish between tab_size and indent_size. This option
+        // only matters when using spaces for indentation, so it should use
+        // `settings.indent_size` and not `settings.tab_size`.
+        tab_size: settings.indent_size.into(),
         insert_spaces: !settings.hard_tabs,
         trim_trailing_whitespace: Some(settings.remove_trailing_whitespace_on_save),
         trim_final_newlines: Some(settings.ensure_final_newline_on_save),

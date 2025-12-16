@@ -10528,28 +10528,28 @@ impl Editor {
 
             // Otherwise, insert a hard or soft tab.
             let settings = buffer.language_settings_at(cursor, cx);
-            let tab_size = if settings.hard_tabs {
+            let indent_size = if settings.hard_tabs {
                 IndentSize::tab()
             } else {
-                let tab_size = settings.tab_size.get();
+                let indent_size = settings.indent_size.get();
                 let indent_remainder = snapshot
                     .text_for_range(Point::new(cursor.row, 0)..cursor)
                     .flat_map(str::chars)
-                    .fold(row_delta % tab_size, |counter: u32, c| {
+                    .fold(row_delta % indent_size, |counter: u32, c| {
                         if c == '\t' {
                             0
                         } else {
-                            (counter + 1) % tab_size
+                            (counter + 1) % indent_size
                         }
                     });
 
-                let chars_to_next_tab_stop = tab_size - indent_remainder;
+                let chars_to_next_tab_stop = indent_size - indent_remainder;
                 IndentSize::spaces(chars_to_next_tab_stop)
             };
-            selection.start = Point::new(cursor.row, cursor.column + row_delta + tab_size.len);
+            selection.start = Point::new(cursor.row, cursor.column + row_delta + indent_size.len);
             selection.end = selection.start;
-            edits.push((cursor..cursor, tab_size.chars().collect::<String>()));
-            row_delta += tab_size.len;
+            edits.push((cursor..cursor, indent_size.chars().collect::<String>()));
+            row_delta += indent_size.len;
         }
 
         self.transact(window, cx, |this, window, cx| {
@@ -10600,7 +10600,7 @@ impl Editor {
         cx: &App,
     ) -> u32 {
         let settings = buffer.language_settings_at(selection.start, cx);
-        let tab_size = settings.tab_size.get();
+        let indent_size = settings.indent_size.get();
         let indent_kind = if settings.hard_tabs {
             IndentKind::Tab
         } else {
@@ -10632,10 +10632,10 @@ impl Editor {
             let current_indent = snapshot.indent_size_for_line(MultiBufferRow(row));
             let indent_delta = match (current_indent.kind, indent_kind) {
                 (IndentKind::Space, IndentKind::Space) => {
-                    let columns_to_next_tab_stop = tab_size - (current_indent.len % tab_size);
+                    let columns_to_next_tab_stop = indent_size - (current_indent.len % indent_size);
                     IndentSize::spaces(columns_to_next_tab_stop)
                 }
-                (IndentKind::Tab, IndentKind::Space) => IndentSize::spaces(tab_size),
+                (IndentKind::Tab, IndentKind::Space) => IndentSize::spaces(indent_size),
                 (_, IndentKind::Tab) => IndentSize::tab(),
             };
 
@@ -10686,7 +10686,7 @@ impl Editor {
             let snapshot = buffer.snapshot(cx);
             for selection in &selections {
                 let settings = buffer.language_settings_at(selection.start, cx);
-                let tab_size = settings.tab_size.get();
+                let indent_size = settings.indent_size.get();
                 let mut rows = selection.spanned_rows(false, &display_map);
 
                 // Avoid re-outdenting a row that has already been outdented by a
@@ -10702,9 +10702,9 @@ impl Editor {
                     if indent_size.len > 0 {
                         let deletion_len = match indent_size.kind {
                             IndentKind::Space => {
-                                let columns_to_prev_tab_stop = indent_size.len % tab_size;
+                                let columns_to_prev_tab_stop = indent_size.len % indent_size;
                                 if columns_to_prev_tab_stop == 0 {
-                                    tab_size
+                                    indent_size
                                 } else {
                                     columns_to_prev_tab_stop
                                 }

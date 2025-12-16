@@ -3139,7 +3139,7 @@ impl BufferSnapshot {
         if settings.hard_tabs {
             IndentSize::tab()
         } else {
-            IndentSize::spaces(settings.tab_size.get())
+            IndentSize::spaces(settings.indent_size.get())
         }
     }
 

@@ -414,7 +414,7 @@ impl Prettier {
                                 options.insert(
                                     "tabWidth".to_string(),
                                     serde_json::Value::Number(serde_json::Number::from(
-                                        language_settings.tab_size.get(),
+                                        language_settings.indent_size.get(),
                                     )),
                                 );
                             }

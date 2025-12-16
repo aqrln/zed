@@ -971,7 +971,7 @@ impl Copilot {
             buffer.file(),
             cx,
         );
-        let tab_size = settings.tab_size;
+        let indent_size = settings.indent_size;
         let hard_tabs = settings.hard_tabs;
         let relative_path = buffer
             .file()
@@ -983,8 +983,8 @@ impl Copilot {
                 .request::<R>(request::GetCompletionsParams {
                     doc: request::GetCompletionsDocument {
                         uri,
-                        tab_size: tab_size.into(),
-                        indent_size: 1,
+                        tab_size: indent_size.into(),
+                        indent_size: 1, // TODO: what is this? it doesn't seem to actually exist in copilot lsp
                         insert_spaces: !hard_tabs,
                         relative_path: relative_path.to_proto(),
                         position: point_to_lsp(position),

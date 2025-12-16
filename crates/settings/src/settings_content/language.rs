@@ -270,8 +270,14 @@ pub struct LanguageSettingsContent {
     /// Default: 4
     #[schemars(range(min = 1, max = 128))]
     pub tab_size: Option<NonZeroU32>,
+    /// How many columns should be used for indentation.
+    ///
+    /// Default: equals to 'tab_size'.
+    #[schemars(range(min = 1, max = 128))]
+    pub indent_size: Option<NonZeroU32>,
     /// Whether to indent lines using tab characters, as opposed to multiple
-    /// spaces.
+    /// spaces. If 'indent_size' is smaller than 'tab_size', spaces will be
+    /// used until 'tab_size' number of spaces is reached.
     ///
     /// Default: false
     pub hard_tabs: Option<bool>,

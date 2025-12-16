@@ -6039,6 +6039,7 @@ impl MultiBufferSnapshot {
                     )
                 })
                 .1;
+            let indent_size = settings.indent_size.get();
             let tab_size = settings.tab_size.get();
 
             // When encountering empty, continue until found useful line indent
@@ -6068,7 +6069,7 @@ impl MultiBufferSnapshot {
             }
 
             let depth = if found_indent {
-                line_indent.len(tab_size) / tab_size
+                line_indent.len(tab_size) / indent_size
             } else {
                 0
             };
@@ -6096,7 +6097,7 @@ impl MultiBufferSnapshot {
                             start_row: first_row,
                             end_row: last_row,
                             depth: next_depth,
-                            tab_size,
+                            tab_size: indent_size,
                             settings: settings.indent_guides.clone(),
                         });
                     }

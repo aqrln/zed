@@ -1220,6 +1220,8 @@
   "hard_tabs": false,
   // How many columns a tab should occupy.
   "tab_size": 4,
+  // How many columns should be use for indentation. If not set, defaults to the value of "tab_size".
+  "indent_size": null,
   // What debuggers are preferred by default for all languages.
   "debuggers": [],
   // Whether to enable word diff highlighting in the editor.
