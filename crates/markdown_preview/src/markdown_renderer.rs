@@ -7,6 +7,7 @@ use crate::{
         ParsedMarkdownTableAlignment, ParsedMarkdownTableRow,
     },
     markdown_preview_view::MarkdownPreviewView,
+    mermaid::MermaidDiagram,
 };
 use collections::HashMap;
 use fs::normalize_path;
@@ -747,17 +748,19 @@ fn render_markdown_code_block(
     parsed: &ParsedMarkdownCodeBlock,
     cx: &mut RenderContext,
 ) -> AnyElement {
-    let body = if let Some(highlights) = parsed.highlights.as_ref() {
-        StyledText::new(parsed.contents.clone()).with_default_highlights(
-            &cx.buffer_text_style,
-            highlights.iter().filter_map(|(range, highlight_id)| {
-                highlight_id
-                    .style(cx.syntax_theme.as_ref())
-                    .map(|style| (range.clone(), style))
-            }),
-        )
-    } else {
-        StyledText::new(parsed.contents.clone())
+    let body = || {
+        if let Some(highlights) = parsed.highlights.as_ref() {
+            StyledText::new(parsed.contents.clone()).with_default_highlights(
+                &cx.buffer_text_style,
+                highlights.iter().filter_map(|(range, highlight_id)| {
+                    highlight_id
+                        .style(cx.syntax_theme.as_ref())
+                        .map(|style| (range.clone(), style))
+                }),
+            )
+        } else {
+            StyledText::new(parsed.contents.clone())
+        }
     };
 
     let copy_block_button = CopyButton::new("copy-codeblock", parsed.contents.clone())
@@ -770,13 +773,17 @@ fn render_markdown_code_block(
         ..Default::default()
     };
 
+    let is_mermaid = parsed.language.as_ref().is_some_and(|l| l == "mermaid");
+
     cx.with_common_p(div())
-        .font(font)
         .px_3()
         .py_3()
         .bg(cx.code_block_background_color)
         .rounded_sm()
-        .child(body)
+        .when(is_mermaid, |this| {
+            this.child(MermaidDiagram::new(parsed.contents.clone()))
+        })
+        .when(!is_mermaid, |this| this.font(font).child(body()))
         .child(
             div()
                 .h_flex()

@@ -437,6 +437,12 @@ pub fn devcontainer_dir() -> &'static PathBuf {
     DEVCONTAINER_DIR.get_or_init(|| data_dir().join("devcontainer"))
 }
 
+/// Returns the path to the Mermaid diagrams cache directory.
+pub fn mermaid_cache_dir() -> &'static PathBuf {
+    static MERMAID_CACHE_DIR: OnceLock<PathBuf> = OnceLock::new();
+    MERMAID_CACHE_DIR.get_or_init(|| temp_dir().join("mermaid"))
+}
+
 /// Returns the relative path to a `.zed` folder within a project.
 pub fn local_settings_folder_name() -> &'static str {
     ".zed"
